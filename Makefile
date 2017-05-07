@@ -12,6 +12,7 @@ push-master-tag::
 update-makefiles::
 	make prune-common-make
 
+# strip out everything from common-makefiles that we don't want.
 prune-common-make:
 	@find devops/make -type f \
 		-not -name common.mk \
@@ -19,17 +20,3 @@ prune-common-make:
 	@find devops/make -empty -delete
 	@git add devops/make
 	@git commit -C HEAD --amend
-
-
-# initial pull of common-make
-	# rm -rf .git devops
-	# git init
-	# git add .
-	# git commit -a -m'initial commit'
-	# git remote add common_makefiles git@github.com:pantheon-systems/common_makefiles.git --no-tags
-	# git subtree add --prefix devops/make common_makefiles master --squash
-	# make strip-common-make
-
-# updates
-# make update-makefiles
-# 	make -C strip-make
