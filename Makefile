@@ -9,7 +9,9 @@ push-master-tag::
 	@docker push quay.io/getpantheon/gcloud-kubectl:master
 
 # extend the update-makefiles task to remove files we don't need
-#update-makefiles::
+update-makefiles::
+	make prune-common-make
+
 prune-common-make:
 	@find devops/make -type f \
 		-not -name common.mk \
