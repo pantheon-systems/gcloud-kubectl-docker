@@ -6,6 +6,7 @@ RUN apt-get update -qq \
     && apt-get install -qy \
         curl \
         apt-transport-https \
+    && apt-get upgrade -qy \
     && apt-get -y autoremove \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/* \
