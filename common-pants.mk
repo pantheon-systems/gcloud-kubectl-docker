@@ -17,7 +17,7 @@ ifdef PANTS_INCLUDE
 endif
 
 ## append to the global task
-deps-circle:: install-circle-pants
+deps-circle:: install-circle-pants delete-circle-pants
 
 install-circle-fetch:
 ifeq (,$(wildcard $(HOME)/bin/fetch ))
@@ -41,9 +41,15 @@ endif
 	@mv $(HOME)/bin/pants-linux $(HOME)/bin/pants > /dev/null
 	@chmod 755 $(HOME)/bin/pants > /dev/null
 
-init-circle-pants:: ## initializes pants sandbox, updates sandbox if it exists
+delete-circle-pants:: ## deletes pants sandbox
+ifneq ($(KUBE_NAMESPACE), production) # prod
+	$(call INFO, "Deleting sandbox \'$(KUBE_NAMESPACE)\'")
+	@pants sandbox delete --sandbox=$(KUBE_NAMESPACE) --update-onebox=false 2> /dev/null
+endif
+
+init-circle-pants:: ## initializes pants sandbox
 	$(call INFO, "Initializing sandbox \'$(KUBE_NAMESPACE)\' with flags \'$(FLAGS)\'")
-	@pants sandbox init --sandbox=$(KUBE_NAMESPACE) $(FLAGS) 2> /dev/null || pants sandbox update --sandbox=$(KUBE_NAMESPACE) $(FLAGS)
+	@pants sandbox init --sandbox=$(KUBE_NAMESPACE) $(FLAGS) 2> /dev/null
 
 init-circle-pants:: label-ci-ns
 

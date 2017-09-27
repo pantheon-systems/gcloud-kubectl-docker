@@ -27,7 +27,7 @@ export CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE=True
 sudo -E $gcloud components update > /dev/null 2>&1
 sudo -E $gcloud components update kubectl > /dev/null 2>&1
 
-sudo -E chown -R ubuntu /home/ubuntu/.config/gcloud
+sudo -E chown -R "$(whoami)" ~/.config/gcloud
 
 echo "Setting Project"
 $gcloud config set project "$CLOUDSDK_CORE_PROJECT"

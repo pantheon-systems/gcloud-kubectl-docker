@@ -96,6 +96,12 @@ update-services:
 	test "$(KUBE_NAMESPACE)"
 	kubectl apply --namespace=$(KUBE_NAMESPACE) -f devops/k8s/service.template.yml
 
+# add a disruption budget to the production namespace. Disruption budgets are used
+# to ensure your app pods aren't evicted all at once during cluster maintenance.
+# see: https://kubernetes.io/docs/tasks/administer-cluster/configure-pod-disruption-budget/
+update-budget:
+	kubectl apply -f devops/k8s/budget.yaml
+
 # In our `circle.yml`, we always follow a `deploy` command with `check-deployment-status`,
 # this ensures that the deploy was actually successful. By first deploying to the
 # `template-sandbox` namespace we can catch certain failures before they deploy to production.

@@ -174,5 +174,4 @@ deployment:
 
       # Running without a KUBE_NAMESPACE will cause common makefiles to infer
       # the correct namespace. For master branch, this will deploy to `production`.
-      - make deploy check-deployment-status
-
+      - make update-budget deploy check-deployment-status

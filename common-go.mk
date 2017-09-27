@@ -115,7 +115,7 @@ ifdef COVERALLS_TOKEN
 	$(call INFO, "reporting coverage to coveralls")
 	@goveralls -repotoken $$COVERALLS_TOKEN -service=circleci -coverprofile=coverage.out > /dev/null
 else
-	$(call ERROR, "You asked to use Coveralls, but neglected to set the COVERALLS_TOKEN environment variable")
+	$(call WARN, "You asked to use Coveralls but neglected to set the COVERALLS_TOKEN environment variable")
 endif
 
 test-coverage-html:: test-coverage ## output html coverage file

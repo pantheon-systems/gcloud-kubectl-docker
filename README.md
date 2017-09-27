@@ -9,6 +9,9 @@ Common make tasks
   * [Using in your Makefile](#using-in-your-makefile)
   * [Updating common makefiles](#updating-common-makefiles)
   * [Extending Tasks](#extending-tasks)
+  * [Usage with public repos](#usage-with-public-repos)
+    + [Initial import](#initial-import)
+    + [Future updates](#future-updates)
 - [Tasks](#tasks)
   * [common.mk](#commonmk)
     + [help](#help)
@@ -32,6 +35,8 @@ Common make tasks
   * [common-pants.mk](#common-pantsmk)
   * [install-circle-fetch](#install-circle-fetch)
   * [install-circle-pants](#install-circle-pants)
+  * [delete-circle-pants](#delete-circle-pants)
+  * [init-circle-pants](#init-circle-pants)
   * [common-conda.mk](#common-condamk)
     + [Notes:](#notes)
     + [Inheritable Input Environment Variables from common-python.mk:](#inheritable-input-environment-variables-from-common-pythonmk)
@@ -190,6 +195,55 @@ build::
   @echo "this is after the common build"
 ```
 
+Usage with public repos
+-----------------------
+
+Ideally we should never add anything sensitive or secret to common-makefiles.
+Nonetheless, it is safest to prune out anything not needed by your project if
+it is going to be a public Github repo.
+
+Here is a method for pruning out unused files:
+
+### Initial import
+
+- Create <project>/Makefile with an extended `update-makefiles` task and a new
+`prune-common-make` task. The prune task should be customized to include only the
+files your project will need. Everything else will be removed locally and from
+git. Example project that only needs `common.mk` and `common-docker.mk`:
+
+```
+# extend the update-makefiles task to remove files we don't need
+update-makefiles::
+        make prune-common-make
+
+# strip out everything from common-makefiles that we don't want.
+prune-common-make:
+        @find devops/make -type f  \
+                -not -name common.mk \
+                -not -name common-docker.mk \
+                -delete
+        @find devops/make -empty -delete
+        @git add devops/make
+        @git commit -C HEAD --amend
+```
+
+- Follow the standard procedures for adding the common_makefiles to your project:
+```
+git remote add common_makefiles git@github.com:pantheon-systems/common_makefiles.git --no-tags
+git subtree add --prefix devops/make common_makefiles master --squash
+```
+
+- And then execute the prune task created in the first step:
+```
+make prune-common-make
+```
+
+### Future updates
+
+After the initial import of common_makefiles the project can be updated in the
+standard way: `make update-makefiles`. The `prune-common-make` task will be
+executed after the updates are pulled in.
+
 Tasks
 =====
 
@@ -277,7 +331,7 @@ machine:
 
 To push a container to quay.io upon a successful master build:
 - On Circle-CI, navigate to *Project Settings > Environment Variables*.
-- Add the following environment vars. Ask `@infra` on Slack if you need 
+- Add the following environment vars. Ask `@infra` on Slack if you need
   assistance accessing the Secure Notes in OneLogin.
 ```
 QUAY_USER: getpantheon+circleci
@@ -394,6 +448,20 @@ Installs the `pants` utility on Circle-CI from https://github.com/pantheon-syste
 This task is added to the global `deps-circle` task. If `make deps-circle` is already in your
 circle.yml file then you only need to `include common-pants.mk` in your Makefile.
 
+## delete-circle-pants
+
+Deletes the sandbox environment based on the branch if one exists to prepare
+for the deployment.
+
+This task is added to the global `deps-circle` task. If `make deps-circle` is already in your
+circle.yml file then you only need to `include common-pants.mk` in your Makefile.
+
+## init-circle-pants
+
+Creates a kube environment against the `testing.onebox.panth.io` as the
+ygg-api. The kube environment is set with the `KUBE_NAMESPACE` following the
+convention `sandbox-REPO_NAME-BRANCH_NAME`.
+
 common-conda.mk
 ------------
 
@@ -409,7 +477,7 @@ in the top-level Makefile. Example:
 ```
 include devops/make/common-python.mk
 include devops/make/common-conda.mk
-``` 
+```
 To prevent mistakes, some targets are protected from being run inside a conda
 environment by using the `_assert-conda-env-active` and `_assert-conda-env-not-active`
 targets respectively.
@@ -535,7 +603,7 @@ This task is added to the global `build` task.
 
 ### test-python::
 
-Runs targets `test-coverage-python` and target the global `lint` target. 
+Runs targets `test-coverage-python` and target the global `lint` target.
 
 This task is added to the global `test` task.
 
@@ -868,7 +936,9 @@ of files in a directory or a 'literal' map. Directory of files is what it sounds
 like; make a directory and put files in it. Each file will use its name as a key
 name for the configmap, and the data in the file as the value. A Literal map is
 a file that has a set of k=v pairs in it one per line. Each line will have it's
-data split into configmap keys and values.
+data split into configmap keys and values. _BEWARE_ that the value should not be
+quoted. Due to how the shell interpolation happens when passing these k=v pairs
+to kubectl quote strings will be literal quoted strings in the kube config map.
 
 Put a file or directory in the proper namespace e.g.
 `./devops/k8s/configmaps/<namespace>/<map-name>` then run `make update-configmaps`
@@ -978,8 +1048,8 @@ subtree on your project.
 Logging
 -------
 
-There are 3 logging functions defined in `common.mk` INFO, WARN, and ERROR. 
-If you want to have clean output for make tasks you should redirect STDOUT to 
+There are 3 logging functions defined in `common.mk` INFO, WARN, and ERROR.
+If you want to have clean output for make tasks you should redirect STDOUT to
 /dev/null, and use these logging functions for reporting info to the user:
 
 ```

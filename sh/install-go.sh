@@ -29,6 +29,7 @@
 #       - bash scripts/install-go.sh
 #
 set -eou pipefail
+
 CIRCLECI=${CIRCLECI:-}
 GOVERSION=${GOVERSION:-}
 CIRCLE_REPOSITORY_URL=${CIRCLE_REPOSITORY_URL:-}
@@ -36,6 +37,14 @@ CIRCLE_REPOSITORY_URL=${CIRCLE_REPOSITORY_URL:-}
 if [ "$CIRCLECI" != "true" ]; then
   echo "This script meant to only be run on CIRCLECI"
   exit 1
+fi
+
+# only run this script on circleci 1.0 environments. We detect the environment by looking checking that the
+# current user is 'ubuntu', which indicates circleci 1.0. Newer circleci environments use the 'circleci' user.
+if [ "$USER" != "ubuntu" ]; then
+    echo "CI user is '$USER', not 'ubuntu'. Assuming this is not a circleci 2.0+ build environment"
+    echo "Exiting with no action taken."
+    exit 0
 fi
 
 if [ -z "$GOVERSION" ] ; then

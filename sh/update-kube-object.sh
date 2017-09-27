@@ -30,9 +30,10 @@ map_literal() {
 
     # construct the args array for each line in the file
     literal_args=()
-    for i in $(<"$map_path") ; do
-        literal_args+=("--from-literal=$i")
-    done
+    # use awk to filter comment lines with or without space
+    while read -r kvpair ; do
+      literal_args+=("--from-literal=$kvpair")
+    done <<<"$(awk '!/^ *#/ && NF' "$map_path")"
 
     kubectl delete configmap "$map_name" --namespace="$KUBE_NAMESPACE" > /dev/null 2>&1 || true;
     kubectl create configmap "$map_name" "${literal_args[@]}" --namespace="$KUBE_NAMESPACE"

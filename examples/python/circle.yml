@@ -26,6 +26,4 @@ deployment:
       - master
     commands:
       - make deploy check-deployment-status KUBE_NAMESPACE=template-sandbox
-      - make deploy check-deployment-status
-
-
+      - make update-budget deploy check-deployment-status

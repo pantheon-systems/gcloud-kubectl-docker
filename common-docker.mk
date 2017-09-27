@@ -22,9 +22,15 @@ ifndef BUILD_NUM
    BUILD_NUM := dev
 endif
 
+# TODO: the docker login -e email flag logic can be removed when all projects stop using circleci 1.0 or
+#       if circleci 1.0 build container upgrades its docker > 1.14
 ifdef CIRCLE_BUILD_NUM
   BUILD_NUM := $(CIRCLE_BUILD_NUM)
+ifeq (email-required, $(shell docker login --help | grep -q Email && echo email-required))
   QUAY := docker login -p "$$QUAY_PASSWD" -u "$$QUAY_USER" -e "unused@unused" quay.io
+else
+  QUAY := docker login -p "$$QUAY_PASSWD" -u "$$QUAY_USER" quay.io
+endif
 endif
 
 # These can be overridden
