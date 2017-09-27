@@ -1,0 +1,19 @@
+---
+version: 2
+jobs:
+  build:
+    working_directory: ~/gcloud-kubectl-docker
+    docker:
+      - image: circleci/golang:1.9
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: make deps-circle
+      - run: make build-docker
+      - deploy:
+          name: push image to quay.io
+          command: |
+            if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
+              make push
+              make push-master-tag
+            fi
