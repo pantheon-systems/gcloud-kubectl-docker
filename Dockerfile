@@ -5,6 +5,7 @@ ENV LSB_RELEASE jessie
 RUN apt-get update -qq \
     && apt-get install -qy \
         curl \
+        jq \
         apt-transport-https \
     && apt-get upgrade -qy \
     && apt-get -y autoremove \
