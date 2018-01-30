@@ -7,6 +7,8 @@ RUN apt-get update -qq \
         curl \
         jq \
         apt-transport-https \
+        make \
+        openssh-client \
     && apt-get upgrade -qy \
     && apt-get -y autoremove \
     && apt-get -y clean \
