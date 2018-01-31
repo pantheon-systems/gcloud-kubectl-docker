@@ -3,10 +3,12 @@ APP := gcloud-kubectl
 include devops/make/common.mk
 include devops/make/common-docker.mk
 
-# when pushing from circle and branch is 'master', add a 'master' tag to the docker image
+# when pushing from circle and branch is 'master', add a 'master' and 'latest' tag to the docker image
 push-master-tag::
 	@docker tag $(IMAGE) quay.io/getpantheon/gcloud-kubectl:master
 	@docker push quay.io/getpantheon/gcloud-kubectl:master
+	@docker tag $(IMAGE) quay.io/getpantheon/gcloud-kubectl:latest
+	@docker push quay.io/getpantheon/gcloud-kubectl:latest
 
 # extend the update-makefiles task to remove files we don't need
 update-makefiles::
